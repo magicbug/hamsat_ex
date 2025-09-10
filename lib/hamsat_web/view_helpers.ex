@@ -46,8 +46,12 @@ defmodule HamsatWeb.ViewHelpers do
   end
 
   def duration(start_time, end_time) do
-    end_time
-    |> Timex.diff(start_time, :second)
+    # Normalize both times to DateTime structs if they are Erlang tuples
+    normalized_start = normalize_datetime(start_time)
+    normalized_end = normalize_datetime(end_time)
+    
+    normalized_end
+    |> Timex.diff(normalized_start, :second)
     |> hms()
   end
 
@@ -112,8 +116,8 @@ defmodule HamsatWeb.ViewHelpers do
   end
 
   def time_span(context, start_datetime, end_datetime) do
-    start_datetime = start_datetime |> Timex.to_datetime("Etc/UTC") |> Timex.to_datetime(context.timezone)
-    end_datetime = end_datetime |> Timex.to_datetime("Etc/UTC") |> Timex.to_datetime(context.timezone)
+    start_datetime = start_datetime |> normalize_datetime() |> Timex.to_datetime(context.timezone)
+    end_datetime = end_datetime |> normalize_datetime() |> Timex.to_datetime(context.timezone)
 
     if Timex.to_date(start_datetime) == Timex.to_date(end_datetime) do
       Timex.format!(start_datetime, @time_formats[context.time_format]) <>
