@@ -266,12 +266,14 @@ defmodule Hamsat.Alerts do
 
   def show_create_alert_button?(context, pass, now) do
     # now < LOS
-    Timex.compare(now, pass.info.los.datetime) == -1 and
+    los_datetime = Hamsat.Util.erl_to_utc_datetime(pass.info.los.datetime)
+    Timex.compare(now, los_datetime) == -1 and
       (context.user == :guest or context.user.id not in Enum.map(pass.alerts, & &1.user_id))
   end
 
   def show_edit_alert_button?(context, pass, now) do
-    Timex.compare(now, pass.info.los.datetime) == -1 and
+    los_datetime = Hamsat.Util.erl_to_utc_datetime(pass.info.los.datetime)
+    Timex.compare(now, los_datetime) == -1 and
       my_alert_during_pass(context, pass) != nil
   end
 

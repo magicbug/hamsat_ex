@@ -2,9 +2,12 @@ defmodule Hamsat.Alerts.Pass do
   defstruct [:id, :info, :alerts, :sat, :observer, :hash]
 
   def progression(pass, now) do
+    aos_datetime = Hamsat.Util.erl_to_utc_datetime(pass.info.aos.datetime)
+    los_datetime = Hamsat.Util.erl_to_utc_datetime(pass.info.los.datetime)
+    
     cond do
-      Timex.compare(now, pass.info.aos.datetime) == -1 -> :upcoming
-      Timex.compare(now, pass.info.los.datetime) == 1 -> :passed
+      Timex.compare(now, aos_datetime) == -1 -> :upcoming
+      Timex.compare(now, los_datetime) == 1 -> :passed
       true -> :in_progress
     end
   end
@@ -47,12 +50,15 @@ defmodule Hamsat.Alerts.Pass do
   end
 
   def next_event(%__MODULE__{} = pass, now) do
+    aos_datetime = Hamsat.Util.erl_to_utc_datetime(pass.info.aos.datetime)
+    los_datetime = Hamsat.Util.erl_to_utc_datetime(pass.info.los.datetime)
+    
     cond do
-      Timex.compare(now, pass.info.aos.datetime) < 1 ->
-        {:aos, Timex.diff(pass.info.aos.datetime, now, :second)}
+      Timex.compare(now, aos_datetime) < 1 ->
+        {:aos, Timex.diff(aos_datetime, now, :second)}
 
-      Timex.compare(now, pass.info.los.datetime) < 1 ->
-        {:los, Timex.diff(pass.info.los.datetime, now, :second)}
+      Timex.compare(now, los_datetime) < 1 ->
+        {:los, Timex.diff(los_datetime, now, :second)}
 
       true ->
         :never
